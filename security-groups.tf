@@ -18,6 +18,7 @@ resource "aws_security_group_rule" "load_balancer_allow_80" {
   from_port = 80
   to_port = 80
   cidr_blocks = var.allowed_traffic_cidr_blocks
+  ipv6_cidr_blocks = length(var.allowed_traffic_cidr_blocks_ipv6) > 0 ? var.allowed_traffic_cidr_blocks_ipv6 : null
   description = "Allow HTTP traffic."
 }
 
@@ -28,9 +29,12 @@ resource "aws_security_group_rule" "load_balancer_allow_443" {
   from_port = 443
   to_port = 443
   cidr_blocks = var.allowed_traffic_cidr_blocks
+  ipv6_cidr_blocks = length(var.allowed_traffic_cidr_blocks_ipv6) > 0 ? var.allowed_traffic_cidr_blocks_ipv6 : null
   description = "Allow HTTPS traffic."
 }
 
+## Only the Load Balancer is set up to work with IPv6.  Once a request
+## comes in, it all goes through IPv4 internally.
 resource "aws_security_group_rule" "load_balancer_allow_outbound" {
   security_group_id = aws_security_group.load_balancer.id
   type = "egress"
@@ -38,8 +42,10 @@ resource "aws_security_group_rule" "load_balancer_allow_outbound" {
   from_port   = 0
   to_port     = 0
   cidr_blocks = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = length(var.allowed_traffic_cidr_blocks_ipv6) > 0 ? ["::/0"] : null
   description = "Allow any outbound traffic."
 }
+
 
 ## Vault Instance SG
 
@@ -102,6 +108,7 @@ resource "aws_security_group_rule" "bastion_allow_22" {
   from_port = 22
   to_port = 22
   cidr_blocks = var.allowed_bastion_cidr_blocks
+  ipv6_cidr_blocks = length(var.allowed_bastion_cidr_blocks_ipv6) > 0 ? var.allowed_bastion_cidr_blocks_ipv6 : null
   description = "Allow SSH traffic."
 }
 
@@ -112,5 +119,6 @@ resource "aws_security_group_rule" "bastion_allow_outbound" {
   from_port   = 0
   to_port     = 0
   cidr_blocks = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = length(var.allowed_bastion_cidr_blocks_ipv6) > 0 ? ["::/0"] : null
   description = "Allow any outbound traffic."
 }

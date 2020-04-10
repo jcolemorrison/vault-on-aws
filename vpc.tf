@@ -38,12 +38,6 @@ resource "aws_internet_gateway" "igw" {
 ## Egress Only Gateway (IPv6)
 resource "aws_egress_only_internet_gateway" "eigw" {
   vpc_id = aws_vpc.vault.id
-
-  tags = merge(
-    { "Name" = "${var.main_project_tag}-eigw"},
-    { "Project" = var.main_project_tag },
-    var.vpc_tags
-  )
 }
 
 ## NAT Gateway

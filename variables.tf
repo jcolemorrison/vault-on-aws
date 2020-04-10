@@ -98,11 +98,23 @@ variable "allowed_traffic_cidr_blocks" {
   default = ["0.0.0.0/0"]
 }
 
+variable "allowed_traffic_cidr_blocks_ipv6" {
+  description = "List of IPv6 CIDR blocks allowed to access your vault.  Defaults to EVERYWHERE.  Set to an empty list if not required."
+  type = list(string)
+  default = ["::/0"]
+}
+
 ## What IP Address range can access your bastion server?
 variable "allowed_bastion_cidr_blocks" {
   description = "List of CIDR blocks allowed to access your Bastion.  Defaults to EVERYWHERE.  You should probably limit this to your organization IP or VPC CIDR."
   type = list(string)
   default = ["0.0.0.0/0"]
+}
+
+variable "allowed_bastion_cidr_blocks_ipv6" {
+  description = "List of CIDR blocks allowed to access your Bastion.  Defaults to none."
+  type = list(string)
+  default = []
 }
 
 # Operator Mode
