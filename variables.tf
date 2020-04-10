@@ -82,6 +82,13 @@ variable "dynamodb_table_name" {
   default = "vault_storage"
 }
 
+# SSL Certificate for HTTPS Access
+
+variable "domain_name" {
+  description = "Domain name for which you've provisioned an SSL certificate via AWS Certificate Manager.  Example: secrets.examples.com.  Do not include the protocol (i.e. https://)."
+  type = string
+}
+
 # Allowed Traffic
 ## What IP Address ranges (via CIDR) are allowed to access your vault?
 
