@@ -35,13 +35,13 @@ variable "vpc_instance_tenancy" {
 }
 
 variable "vpc_enable_dns_support" {
-  description = "Whether the DNS resolution is supported."
+  description = "Whether the DNS resolution is supported.  Required as True for VPC endpoint usage."
   type = bool
   default = true
 }
 
 variable "vpc_enable_dns_hostnames" {
-  description = "Whether instances with public IP addresses get corresponding public DNS hostnames."
+  description = "Whether instances with public IP addresses get corresponding public DNS hostnames.  Required as True for VPC endpoint usage."
   type = bool
   default = true
 }

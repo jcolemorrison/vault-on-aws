@@ -80,7 +80,7 @@ resource "aws_nat_gateway" "nat" {
 
 
 # Route Tables
-# NOTE: Routing to the VPC's CIDR is allowed by default, so no route is needed
+// NOTE: Routing to the VPC's CIDR is allowed by default, so no route is needed
 
 ## Public Route Table
 resource "aws_route_table" "public" {
@@ -151,7 +151,7 @@ resource "aws_subnet" "private" {
 
   vpc_id = aws_vpc.vault.id
 
-  # Increment the netnum by the number of public subnets to avoid overlap
+  // Increment the netnum by the number of public subnets to avoid overlap
   cidr_block = cidrsubnet(aws_vpc.vault.cidr_block, 4, count.index + var.vpc_public_subnet_count)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
@@ -171,4 +171,49 @@ resource "aws_subnet" "private" {
 
 
 # VPC Endpoints
-# Make safe calls to KMS and DynamoDB without leaving the VPC.
+// Make safe calls to KMS and DynamoDB without leaving the VPC.  Because #awsthings.  C'mon.  This should be default without these things.
+
+## KMS Endpoint
+data "aws_vpc_endpoint_service" "kms" {
+  service = "kms"
+}
+
+#### To get the required data, if you're confused, just output the above KMS data source.  It has all the details.
+resource "aws_vpc_endpoint" "kms" {
+  service_name = data.aws_vpc_endpoint_service.kms.service_name
+  vpc_id = aws_vpc.vault.id
+  private_dns_enabled = true
+
+  // Can also be done with "aws_vpc_endpoint_subnet_association"
+  subnet_ids = aws_subnet.private.*.id
+  security_group_ids = [aws_security_group.vault_instance.id]
+
+  tags = merge(
+    { "Name" = "${var.main_project_tag}-kms-endpoint"},
+    { "Project" = var.main_project_tag },
+    var.vpc_tags
+  )
+
+  vpc_endpoint_type = "Interface" // KMS is indeed an interface type
+}
+
+## DynamoDB Endpoint
+data "aws_vpc_endpoint_service" "dynamodb" {
+  service = "dynamodb"
+}
+
+resource "aws_vpc_endpoint" "dynamodb" {
+  service_name = data.aws_vpc_endpoint_service.dynamodb.service_name
+  vpc_id = aws_vpc.vault.id
+
+  // Can also be done with "aws_vpc_endpoint_route_table_association"
+  route_table_ids = [aws_route_table.private.id]
+  
+  tags = merge(
+    { "Name" = "${var.main_project_tag}-dynamodb-endpoint"},
+    { "Project" = var.main_project_tag },
+    var.vpc_tags
+  )
+
+  vpc_endpoint_type = "Gateway"
+}
