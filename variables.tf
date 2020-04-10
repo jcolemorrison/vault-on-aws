@@ -82,6 +82,22 @@ variable "dynamodb_table_name" {
   default = "vault_storage"
 }
 
+# Allowed Traffic
+## What IP Address ranges (via CIDR) are allowed to access your vault?
+
+variable "allowed_traffic_cidr_blocks" {
+  description = "List of CIDR blocks allowed to access your vault.  Defaults to EVERYWHERE.  You should probably limit this to your organization IP or VPC CIDR."
+  type = list(string)
+  default = ["0.0.0.0/0"]
+}
+
+## What IP Address range can access your bastion server?
+variable "allowed_bastion_cidr_blocks" {
+  description = "List of CIDR blocks allowed to access your Bastion.  Defaults to EVERYWHERE.  You should probably limit this to your organization IP or VPC CIDR."
+  type = list(string)
+  default = ["0.0.0.0/0"]
+}
+
 # Operator Mode
 ## Turning this on will enable NAT and Bastion to access the Vault Instances
 
