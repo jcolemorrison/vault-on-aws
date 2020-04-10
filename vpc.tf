@@ -4,6 +4,7 @@ resource "aws_vpc" "vault" {
   instance_tenancy = var.vpc_instance_tenancy
   enable_dns_support = var.vpc_enable_dns_support
   enable_dns_hostnames = var.vpc_enable_dns_hostnames
+  assign_generated_ipv6_cidr_block = true
 
   tags = merge(
     { "Name" = "${var.main_project_tag}-vpc" },
@@ -29,6 +30,17 @@ resource "aws_internet_gateway" "igw" {
 
   tags = merge(
     { "Name" = "${var.main_project_tag}-igw"},
+    { "Project" = var.main_project_tag },
+    var.vpc_tags
+  )
+}
+
+## Egress Only Gateway (IPv6)
+resource "aws_egress_only_internet_gateway" "eigw" {
+  vpc_id = aws_vpc.vault.id
+
+  tags = merge(
+    { "Name" = "${var.main_project_tag}-eigw"},
     { "Project" = var.main_project_tag },
     var.vpc_tags
   )
@@ -99,6 +111,12 @@ resource "aws_route" "public_internet_access" {
   gateway_id = aws_internet_gateway.igw.id
 }
 
+resource "aws_route" "public_internet_access_ipv6" {
+  route_table_id = aws_route_table.public.id
+  destination_ipv6_cidr_block = "::/0"
+  egress_only_gateway_id = aws_egress_only_internet_gateway.eigw.id
+}
+
 ## Private Route Table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vault.id
@@ -137,6 +155,9 @@ resource "aws_subnet" "public" {
   cidr_block = cidrsubnet(aws_vpc.vault.cidr_block, 4, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
+
+  ipv6_cidr_block = cidrsubnet(aws_vpc.vault.ipv6_cidr_block, 8, count.index)
+  assign_ipv6_address_on_creation = true
 
   tags = merge(
     { "Name" = "${var.main_project_tag}-public-${data.aws_availability_zones.available.names[count.index]}"},
