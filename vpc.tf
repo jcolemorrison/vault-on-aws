@@ -185,6 +185,30 @@ resource "aws_subnet" "private" {
 
 
 
+# Route Table Associations
+
+## Public Subnet Route Associations
+resource "aws_route_table_association" "public" {
+  count = var.vpc_public_subnet_count
+
+  subnet_id = element(aws_subnet.public.*.id, count.index)
+  route_table_id = aws_route_table.public.id
+}
+
+## Private Subnet Route Associations
+resource "aws_route_table_association" "private" {
+  count = var.vpc_private_subnet_count
+
+  subnet_id = element(aws_subnet.private.*.id, count.index)
+  route_table_id = aws_route_table.private.id
+}
+
+
+
+
+
+
+
 # VPC Endpoints
 // Make safe calls to KMS and DynamoDB without leaving the VPC.  Because #awsthings.  C'mon.  This should be default without these things.
 

@@ -82,6 +82,21 @@ variable "dynamodb_table_name" {
   default = "vault_storage"
 }
 
+# EC2 - General
+
+variable "ec2_key_pair_name" {
+  description = "Name of an existing EC2 Key Pair that exists in the same region as your vault deployment.  Needs to be made separately."
+  type = string
+}
+
+# EC2 - Bastion
+
+variable "use_lastest_ami" {
+  description = "Whether or not to use the latest version of Amazon Linux 2.  Defaults to false and uses a version that is known to work with this deployment."
+  type = bool
+  default = false
+}
+
 # SSL Certificate for HTTPS Access
 
 variable "domain_name" {
