@@ -51,13 +51,30 @@ resource "aws_lb_target_group" "alb_targets" {
 }
 
 ## Load Balancer Listeners
-##
-## Note: There is NO HTTP listener.  Yes, the convention is to set one up and
-## then force a redirect to HTTPS.  However, this presents a scenario where
-## some genius sends up a requet with their token or credentials over HTTP
-## and is then redirected to HTTPS.  During that redirect, the credentials
-## would be exposed.
 
+### Redirect to HTTPS
+resource "aws_lb_listener" "alb_http_redirect" {
+  load_balancer_arn = aws_lb.alb.arn
+  port = 80
+  protocol = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    // For information on the below reserved keywords
+    // https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html#rule-action-types
+    redirect {
+      host = "#{host}"
+      path = "/#{path}"
+      port = 443
+      protocol = "HTTPS"
+      query = "#{query}"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+### HTTPS
 resource "aws_lb_listener" "alb_https" {
   load_balancer_arn = aws_lb.alb.arn
   port = 443
