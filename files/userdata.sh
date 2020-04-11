@@ -167,6 +167,32 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 # - Create credentials file
 # - Encrypt the file via KMS
 # - Send the file to S3
+# - Delete the local file
 # - Erase bash history
+
+VAULT_INITIALIZED=$(vault operator init -status)
+
+function initialize_vault {
+  # initialize and pipe to file
+  vault operator init > vault_credentials.txt
+
+  # encrypt it with the KMS key
+  aws kms encrypt --key-id ${KMS_KEY_ID} --plaintext fileb://vault_credentials.txt --output text --query CiphertextBlob | base64 --decode > vault_creds_encrypted
+
+  # send the encrypted file to the s3 bucket
+  aws s3 cp vault_creds_encrypted s3://${S3_BUCKET_NAME}
+
+  # cleanup
+  rm vault_credentials.txt
+  history -c
+  history -w
+}
+
+if [ "$VAULT_INITIALIZED" = "Vault is initialized" ]; then
+  echo "Vault is already initialized."
+else
+  echo "Initializing vault..."
+  initialize_vault
+fi
 
 --==BOUNDARY==--
