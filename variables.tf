@@ -15,9 +15,17 @@ variable "aws_profile" {
 }
 
 variable "aws_default_region" {
-  description = "The default region to deploy this."
+  description = "The default region to deploy vault."
   type = string
   default = "us-east-1"
+}
+
+# Vault Version
+
+variable "vault_version" {
+  description = "Version of vault to use."
+  type = string
+  default = "1.4.0"
 }
 
 # AWS VPC

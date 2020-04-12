@@ -67,21 +67,21 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 
 # The vault config file
 cat > /opt/vault/config/server.hcl <<- EOF
-cluster_name      = ${VAULT_CLUSTER_NAME}
+cluster_name      = "${VAULT_CLUSTER_NAME}"
 max_lease_ttl     = "192h" # One week
 default_lease_ttl = "192h" # One week
 ui                = "true"
 
 # Where can the Vault API be reached?  At the load balancer.
-api_addr      = ${VAULT_LOAD_BALANCER_DNS}
+api_addr      = "https://${VAULT_LOAD_BALANCER_DNS}"
 
 # For forwarding between vault servers.  Set to own ip.
 cluster_addr  = "http://INSTANCE_IP_ADDR:8201"
 
 # Auto unseal the vault
 seal "awskms" {
-  region     = ${VAULT_CLUSTER_REGION}
-  kms_key_id = ${VAULT_KMS_KEY}
+  region     = "${VAULT_CLUSTER_REGION}"
+  kms_key_id = "${VAULT_KMS_KEY_ID}"
 }
 
 listener "tcp" {
@@ -94,8 +94,8 @@ listener "tcp" {
 
 storage "dynamodb" {
   ha_enabled = "true"
-  region     = ${VAULT_CLUSTER_REGION}
-  table      = ${VAULT_DYNAMODB_TABLE}
+  region     = "${VAULT_CLUSTER_REGION}"
+  table      = "${VAULT_DYNAMODB_TABLE}"
 }
 EOF
 
@@ -177,10 +177,10 @@ function initialize_vault {
   vault operator init > vault_credentials.txt
 
   # encrypt it with the KMS key
-  aws kms encrypt --key-id ${KMS_KEY_ID} --plaintext fileb://vault_credentials.txt --output text --query CiphertextBlob | base64 --decode > vault_creds_encrypted
+  aws kms encrypt --key-id ${VAULT_KMS_KEY_ID} --plaintext fileb://vault_credentials.txt --output text --query CiphertextBlob | base64 --decode > vault_creds_encrypted
 
   # send the encrypted file to the s3 bucket
-  aws s3 cp vault_creds_encrypted s3://${S3_BUCKET_NAME}
+  aws s3 cp vault_creds_encrypted s3://${VAULT_S3_BUCKET_NAME}/
 
   # cleanup
   rm vault_credentials.txt

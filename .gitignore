@@ -4,3 +4,4 @@ terraform.tfstate.backup
 terraform.tfvars
 todos.md
 .DS_Store
+files/user_data_compiled.sh

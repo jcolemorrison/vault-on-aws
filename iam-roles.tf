@@ -21,6 +21,12 @@ resource "aws_iam_role_policy" "vault_instance_dynamodb_policy" {
   policy = data.aws_iam_policy_document.dynamodb_vault_policy.json
 }
 
+resource "aws_iam_role_policy" "vault_instance_s3_policy" {
+  name_prefix = "${var.main_project_tag}-instance-s3-policy-"
+  role = aws_iam_role.vault_instance.id
+  policy = data.aws_iam_policy_document.s3_vault_policy.json
+}
+
 ## Instance Profile
 
 resource "aws_iam_instance_profile" "vault_instance_profile" {

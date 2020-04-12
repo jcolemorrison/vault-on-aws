@@ -62,6 +62,21 @@ data "aws_iam_policy_document" "dynamodb_vault_policy" {
   }
 }
 
+## S3 Policy
+
+data "aws_iam_policy_document" "s3_vault_policy" {
+  statement {
+    sid = "PutObjects"
+    effect = "Allow"
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.vault_data.arn}/*"
+    ]
+  }
+}
+
 ## AutoScalingGroup Instance Trust Policy
 data "aws_iam_policy_document" "asg_trust_policy" {
   statement {
