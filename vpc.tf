@@ -225,7 +225,7 @@ resource "aws_vpc_endpoint" "kms" {
 
   // Can also be done with "aws_vpc_endpoint_subnet_association"
   subnet_ids = aws_subnet.private.*.id
-  security_group_ids = [aws_security_group.vault_instance.id]
+  security_group_ids = [aws_security_group.kms_endpoint.id]
 
   tags = merge(
     { "Name" = "${var.main_project_tag}-kms-endpoint"},

@@ -72,8 +72,9 @@ max_lease_ttl     = "192h" # One week
 default_lease_ttl = "192h" # One week
 ui                = "true"
 
-# Where can the Vault API be reached?  At the load balancer.
-api_addr      = "https://${VAULT_LOAD_BALANCER_DNS}"
+# Where can the Vault API be reached?  At DNS for the load balancer, or the CNAME created.
+# Note: this maps to the environment variable VAULT_API_ADDR not VAULT_ADDR
+api_addr      = "https://${VAULT_DNS}"
 
 # For forwarding between vault servers.  Set to own ip.
 cluster_addr  = "http://INSTANCE_IP_ADDR:8201"
@@ -84,6 +85,7 @@ seal "awskms" {
   kms_key_id = "${VAULT_KMS_KEY_ID}"
 }
 
+# Apply Listener for local
 listener "tcp" {
   address         = "0.0.0.0:8200"
   cluster_address = "0.0.0.0:8201"
@@ -120,7 +122,7 @@ AmbientCapabilities=CAP_IPC_LOCK
 Capabilities=CAP_IPC_LOCK+ep
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
-ExecStart=/opt/vault/bin/vault server -config /opt/vault/config/ -log-level=info
+ExecStart=/opt/vault/bin/vault server -config=/opt/vault/config/ -log-level=debug
 ExecReload=/bin/kill --signal HUP \$MAINPID
 KillMode=process
 KillSignal=SIGINT
@@ -152,7 +154,7 @@ sed -i -e "s/INSTANCE_IP_ADDR/$INSTANCE_IP_ADDR/g" /opt/vault/config/server.hcl
 
 systemctl daemon-reload
 systemctl enable vault
-systemctl restart vault
+# systemctl restart vault
 
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
@@ -169,6 +171,9 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 # - Send the file to S3
 # - Delete the local file
 # - Erase bash history
+
+export VAULT_ADDR="http://127.0.0.1:8200"
+export AWS_DEFAULT_REGION="${VAULT_CLUSTER_REGION}"
 
 VAULT_INITIALIZED=$(vault operator init -status)
 
@@ -192,7 +197,7 @@ if [ "$VAULT_INITIALIZED" = "Vault is initialized" ]; then
   echo "Vault is already initialized."
 else
   echo "Initializing vault..."
-  initialize_vault
+  # initialize_vault
 fi
 
 --==BOUNDARY==--

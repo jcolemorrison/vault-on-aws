@@ -105,6 +105,22 @@ variable "use_lastest_ami" {
   default = false
 }
 
+# EC2 - Vault Instance Launch Template
+
+variable "vault_instance_type" {
+  description = "The EC2 instance size of the vault instances."
+  type = string
+  default = "t2.micro"
+}
+
+# EC2 - Vault Instance AutoScaling Group
+
+variable "vault_instance_count" {
+  description = "The number of EC2 instances to launch as vault instances.  Should be no less than 2."
+  type = number
+  default = 2
+}
+
 # SSL Certificate for HTTPS Access
 
 variable "domain_name" {
