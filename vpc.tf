@@ -258,3 +258,60 @@ resource "aws_vpc_endpoint" "dynamodb" {
 
   vpc_endpoint_type = "Gateway"
 }
+
+
+
+
+
+
+# VPC Peering
+## Enabled in Private Mode only.
+
+## Data from Peered VPC (AKA the external VPC we're letting in)
+data "aws_vpc" "peered_vpc" {
+  count = var.private_mode ? 1 : 0
+
+  id = var.peered_vpc_id
+}
+
+## Peering Connection
+resource "aws_vpc_peering_connection" "vault" {
+  count = var.private_mode ? 1 : 0
+
+  peer_vpc_id = var.peered_vpc_id
+  vpc_id = aws_vpc.vault.id
+  auto_accept = true
+
+  accepter {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  requester {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  tags = merge(
+    { "Name" = "${var.main_project_tag}-vpc-peering-connection"},
+    { "Project" = var.main_project_tag },
+    var.vpc_tags
+  )
+}
+
+## Peering Connection for the VAULT Route Table
+resource "aws_route" "requester_peering_route" {
+  count = var.private_mode ? 1 : 0
+
+  route_table_id = aws_route_table.public.id
+  destination_cidr_block = data.aws_vpc.peered_vpc[0].cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vault[0].id
+}
+
+## Peering Connection for the External VPC Route Table to allow Vault Traffic
+## Note: this associates it to the external VPC's MAIN ROUTE TABLE.  If you want it associated to a different route table, you'll have to do so manually.
+resource "aws_route" "accepter_peering_route" {
+  count = var.private_mode ? 1 : 0
+
+  route_table_id = data.aws_vpc.peered_vpc[0].main_route_table_id
+  destination_cidr_block = aws_vpc.vault.cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vault[0].id
+}

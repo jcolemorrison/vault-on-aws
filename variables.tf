@@ -164,3 +164,19 @@ variable "operator_mode" {
   type = bool
   default = true
 }
+
+# Private Deploy
+## Turning this on will make it so that the Vault Deployemnt is only available through VPC peering
+
+variable "private_mode" {
+  description = "Whether or not the Vault deployment should be private."
+  type = bool
+  default = false
+}
+
+## A VPC in the SAME AWS Account AND Region as your Vault deployment.  It MUST have "enable dns hostnames" active AND it cannot use the same CIDR block as the Vault VPC.
+variable "peered_vpc_id" {
+  description = "ID of a VPC that can access the Vault VPC and thus access vault privately."
+  type = string
+  default = ""
+}

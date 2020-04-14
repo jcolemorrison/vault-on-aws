@@ -11,12 +11,12 @@ resource "aws_lb" "alb" {
   // and the fact that Terraform adds a 26 character random bit to the end.
   // https://github.com/terraform-providers/terraform-provider-aws/issues/1666
   name_prefix = "vault-"
-  internal = false
+  internal = var.private_mode
   load_balancer_type = "application"
   security_groups = [aws_security_group.load_balancer.id]
   subnets = aws_subnet.public.*.id
   idle_timeout = 60
-  ip_address_type = "dualstack"
+  ip_address_type = var.private_mode ? "ipv4" : "dualstack"
 
   tags = merge(
     { "Name" = "${var.main_project_tag}-alb"},
