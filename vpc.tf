@@ -105,12 +105,6 @@ resource "aws_route" "public_internet_access" {
   gateway_id = aws_internet_gateway.igw.id
 }
 
-resource "aws_route" "public_internet_access_ipv6" {
-  route_table_id = aws_route_table.public.id
-  destination_ipv6_cidr_block = "::/0"
-  egress_only_gateway_id = aws_egress_only_internet_gateway.eigw.id
-}
-
 ## Private Route Table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vault.id
@@ -128,6 +122,14 @@ resource "aws_route" "private_internet_access" {
   route_table_id = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.nat[0].id
+}
+
+resource "aws_route" "private_internet_access_ipv6" {
+  count = var.operator_mode ? 1 : 0
+
+  route_table_id = aws_route_table.private.id
+  destination_ipv6_cidr_block = "::/0"
+  egress_only_gateway_id = aws_egress_only_internet_gateway.eigw.id
 }
 
 
