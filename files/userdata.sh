@@ -178,6 +178,9 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 # - Delete the local file
 # - Erase bash history
 
+# Workaround to make sure the vault service is fully initialized.
+sleep 10
+
 export VAULT_ADDR="http://127.0.0.1:8200"
 export AWS_DEFAULT_REGION="${VAULT_CLUSTER_REGION}"
 

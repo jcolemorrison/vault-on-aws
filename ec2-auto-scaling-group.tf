@@ -8,6 +8,8 @@ resource "aws_autoscaling_group" "vault-asg" {
     version = aws_launch_template.vault_instance.latest_version
   }
 
+  target_group_arns = [aws_lb_target_group.alb_targets.arn]
+
   # All the same to keep at a fixed size
   desired_capacity = var.vault_instance_count
   min_size = var.vault_instance_count
