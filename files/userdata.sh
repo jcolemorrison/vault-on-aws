@@ -68,8 +68,8 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 # The vault config file
 cat > /opt/vault/config/server.hcl <<- EOF
 cluster_name      = "${VAULT_CLUSTER_NAME}"
-max_lease_ttl     = "192h" # One week
-default_lease_ttl = "192h" # One week
+max_lease_ttl     = "192h"
+default_lease_ttl = "192h"
 ui                = "true"
 
 # Where can the Vault API be reached?  At DNS for the load balancer, or the CNAME created.
@@ -85,10 +85,16 @@ seal "awskms" {
   kms_key_id = "${VAULT_KMS_KEY_ID}"
 }
 
-# Apply Listener for local
+# Listener for loopback
 listener "tcp" {
-  address         = "0.0.0.0:8200"
-  cluster_address = "0.0.0.0:8201"
+  address     = "127.0.0.1:8200"
+  tls_disable = "true"
+}
+
+# Listener for private network
+listener "tcp" {
+  address         = "INSTANCE_IP_ADDR:8200"
+  cluster_address = "INSTANCE_IP_ADDR:8201"
 
   # off, because they all talk in a private subnet
   tls_disable     = "true"
@@ -154,7 +160,7 @@ sed -i -e "s/INSTANCE_IP_ADDR/$INSTANCE_IP_ADDR/g" /opt/vault/config/server.hcl
 
 systemctl daemon-reload
 systemctl enable vault
-# systemctl restart vault
+systemctl restart vault
 
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
@@ -197,7 +203,7 @@ if [ "$VAULT_INITIALIZED" = "Vault is initialized" ]; then
   echo "Vault is already initialized."
 else
   echo "Initializing vault..."
-  # initialize_vault
+  initialize_vault
 fi
 
 --==BOUNDARY==--
