@@ -22,3 +22,8 @@ resource "local_file" "vault_credentials" {
   })
   filename = "${path.module}/tmp/vault_credentials.sh"
 }
+
+# Load Balancer DNS - You need to CNAME or Alias this.
+output "load_balancer_dns" {
+  value = aws_lb.alb.dns_name
+}
