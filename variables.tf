@@ -174,9 +174,9 @@ variable "private_mode" {
   default = false
 }
 
-## A VPC in the SAME AWS Account AND Region as your Vault deployment.  It MUST have "enable dns hostnames" active AND it cannot use the same CIDR block as the Vault VPC.
-variable "peered_vpc_id" {
-  description = "ID of a VPC that can access the Vault VPC and thus access vault privately."
-  type = string
-  default = ""
+## A VPC in the SAME AWS Account and REGION as your Vault deployment.  The VPCs MUST have "enable dns hostnames" active AND cannot use the same CIDR block as the Vault VPC.
+variable "peered_vpc_ids" {
+  description = "A list of of a VPC IDs that can access the Vault VPC and thus access vault privately."
+  type = list(string)
+  default = []
 }
