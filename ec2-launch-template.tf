@@ -33,7 +33,7 @@ resource "aws_launch_template" "vault_instance" {
     { "Project" = var.main_project_tag }
   )
 
-  user_data = base64encode(templatefile("${path.module}/files/userdata.sh", {
+  user_data = base64encode(templatefile("${path.module}/files/userdata_template.sh", {
     VAULT_VERSION = var.vault_version
     VAULT_CLUSTER_NAME = var.main_project_tag
     VAULT_DNS = var.domain_name
