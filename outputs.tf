@@ -19,6 +19,7 @@ resource "local_file" "vault_credentials" {
     AWS_REGION = data.aws_region.current.name
     AWS_S3_BUCKET = aws_s3_bucket.vault_data.id
     AWS_KMS_KEY_ID = aws_kms_key.seal.key_id
+    LOAD_BALANCER_DNS_NAME = aws_lb.alb.dns_name
   })
   filename = "${path.root}/temp/vault_credentials.sh"
 }
