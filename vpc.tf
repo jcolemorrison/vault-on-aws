@@ -2,8 +2,8 @@
 resource "aws_vpc" "vault" {
   cidr_block = var.vpc_cidr
   instance_tenancy = var.vpc_instance_tenancy
-  enable_dns_support = var.vpc_enable_dns_support
-  enable_dns_hostnames = var.vpc_enable_dns_hostnames
+  enable_dns_support = true
+  enable_dns_hostnames = true # required for VPC peering.
   assign_generated_ipv6_cidr_block = true
 
   tags = merge(

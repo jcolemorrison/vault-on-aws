@@ -28,3 +28,17 @@ resource "local_file" "vault_credentials" {
 output "load_balancer_dns" {
   value = aws_lb.alb.dns_name
 }
+
+# VPC Values
+
+output "vpc_id" {
+  value = aws_vpc.vault.id
+}
+
+output "vpc_ipv4_cidr" {
+  value = aws_vpc.vault.cidr_block
+}
+
+output "vpc_ipv6_cidr" {
+  value = aws_vpc.vault.ipv6_cidr_block
+}
