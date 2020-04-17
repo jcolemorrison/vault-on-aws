@@ -138,7 +138,7 @@ variable "vpc_private_subnet_count" {
 variable "vault_instance_type" {
   description = "The EC2 instance size of the vault instances."
   type = string
-  default = "t2.micro"
+  default = "t2.medium"
 }
 
 # EC2 - Vault Instance AutoScaling Group
