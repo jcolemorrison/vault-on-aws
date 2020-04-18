@@ -89,7 +89,7 @@ Using settings in the project, you can also...
 
 This project requires that you have [Terraform 0.12+](https://www.terraform.io/) installed.  Both deployment and management should be done through Terraform.
 
-If you'd like to watch how to set this up and use it [check out these videos]().  They walk you through the full deployment of this project from scratch.
+If you'd like to watch how to set this up and use it [check out these videos](https://www.youtube.com/playlist?list=PLesRB-DxZa8aTqGMk1MIRmR0zzfrCq1ck).  They walk you through the full deployment of this project from scratch.
 
 ## Table of Contents
 
@@ -168,7 +168,7 @@ There are some manual steps that need to be taken, but its due to the nature of 
 
 After deploying the project [use the Vault documentation](https://www.vaultproject.io/docs) and [Vault API documentation](https://www.vaultproject.io/api-docs) to interact with your Vault deployment.
 
-You can also watch a walk through of installation, deployment, basic usage and concepts for this project. [Checkout the videos here]().
+You can also watch a walk through of installation, deployment, basic usage and concepts for this project. [Checkout the videos here](https://www.youtube.com/playlist?list=PLesRB-DxZa8aTqGMk1MIRmR0zzfrCq1ck).
 
 ## Prerequisites for Deployment
 
@@ -378,7 +378,7 @@ External VPCs that you want to give access to the Vault VPC need to...
 
 Deploying and managing the project should all be done through Terraform.
 
-Again, you can also watch a walk through of deploying this project in [these videos]().
+Again, you can also watch a walk through of deploying this project in [these videos](https://www.youtube.com/playlist?list=PLesRB-DxZa8aTqGMk1MIRmR0zzfrCq1ck).
 
 #### 1 - Clone the Project
 
@@ -632,7 +632,7 @@ In the above example, the two VPCs would have a peering connection set up with t
 
 The reason VPC Peering is **recommended** over launching more services into the Vault VPC is to allow for complete security.  By ensuring that no other services and servers are intermingling with the public and private subnets, no potential threats are present.  Since you're probably using this to store sensitive data, keeping throughput and openings to a minimum is critical.
 
-For a full example of deploying and using the `private_mode` set up, [checkout these videos]().  They demonstrate the requirements, usage with external VPCs, and interacting with Vault from EC2 instances in external VPCs.
+For a full example of deploying and using the `private_mode` set up, [checkout these videos](https://www.youtube.com/playlist?list=PLesRB-DxZa8aTqGMk1MIRmR0zzfrCq1ck).  They demonstrate the requirements, usage with external VPCs, and interacting with Vault from EC2 instances in external VPCs.
 
 ## Questions
 
