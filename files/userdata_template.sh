@@ -67,43 +67,43 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 
 # The vault config file
 cat > /opt/vault/config/server.hcl <<- EOF
-cluster_name      = "${VAULT_CLUSTER_NAME}"
-max_lease_ttl     = "192h"
+cluster_name = "${VAULT_CLUSTER_NAME}"
+max_lease_ttl = "192h"
 default_lease_ttl = "192h"
-ui                = "true"
+ui  = "true"
 
 # Where can the Vault API be reached?  At DNS for the load balancer, or the CNAME created.
 # Note: this maps to the environment variable VAULT_API_ADDR not VAULT_ADDR
-api_addr      = "https://${VAULT_DNS}"
+api_addr = "https://${VAULT_DNS}"
 
 # For forwarding between vault servers.  Set to own ip.
-cluster_addr  = "http://INSTANCE_IP_ADDR:8201"
+cluster_addr = "http://INSTANCE_IP_ADDR:8201"
 
 # Auto unseal the vault
 seal "awskms" {
-  region     = "${VAULT_CLUSTER_REGION}"
+  region = "${VAULT_CLUSTER_REGION}"
   kms_key_id = "${VAULT_KMS_KEY_ID}"
 }
 
 # Listener for loopback
 listener "tcp" {
-  address     = "127.0.0.1:8200"
+  address = "127.0.0.1:8200"
   tls_disable = "true"
 }
 
 # Listener for private network
 listener "tcp" {
-  address         = "INSTANCE_IP_ADDR:8200"
+  address = "INSTANCE_IP_ADDR:8200"
   cluster_address = "INSTANCE_IP_ADDR:8201"
 
   # off, because they all talk in a private subnet
-  tls_disable     = "true"
+  tls_disable = "true"
 }
 
 storage "dynamodb" {
   ha_enabled = "true"
-  region     = "${VAULT_CLUSTER_REGION}"
-  table      = "${VAULT_DYNAMODB_TABLE}"
+  region = "${VAULT_CLUSTER_REGION}"
+  table = "${VAULT_DYNAMODB_TABLE}"
 }
 EOF
 
