@@ -28,7 +28,7 @@ resource "aws_lb" "alb" {
 resource "aws_lb_target_group" "alb_targets" {
   name_prefix = "vault-"
   port = 8200
-  protocol = "HTTP"
+  protocol = "HTTPS"
   vpc_id = aws_vpc.vault.id
   deregistration_delay = 30
   target_type = "instance"
@@ -37,7 +37,7 @@ resource "aws_lb_target_group" "alb_targets" {
     enabled = true
     interval = 10
     path = "/v1/sys/health" // the Vault API health port
-    protocol = "HTTP"
+    protocol = "HTTPS"
     timeout = 5
     healthy_threshold = 3
     unhealthy_threshold = 3
