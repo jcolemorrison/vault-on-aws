@@ -27,6 +27,7 @@ useradd --system --shell /sbin/nologin vault
 mkdir -p "/opt/vault"
 mkdir -p "/opt/vault/bin"
 mkdir -p "/opt/vault/config"
+mkdir -p "/opt/vault/tls"
 
 # Give corret permissions
 chmod 755 "/opt/vault"
@@ -62,6 +63,32 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 # Run Frequency: only once, on first boot
 
 # Tasks:
+# - Fetch needed data
+# - Create Self-Signed Certificate and Key
+
+INSTANCE_IP_ADDR=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+INSTANCE_DNS_NAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)
+
+# Used for encryption between the load balancer and vault instances.
+# Th other alternatives are either creating an entire, private CA and hoping AWS
+# eventually adds the ability to add trusted CAs to load balancers...
+# ...or paying $400/month base for the ACM private CA.
+openssl req -x509 -sha256 -nodes \
+  -newkey rsa:4096 -days 3650 \
+  -keyout /opt/vault/tls/vault.pem -out /opt/vault/tls/vault.crt \
+  -subj "/CN=$INSTANCE_DNS_NAME" \
+  -extensions san \
+  -config <(cat /etc/pki/tls/openssl.cnf <(echo -e "\n[san]\nsubjectAltName=DNS:$INSTANCE_DNS_NAME,IP:$INSTANCE_IP_ADDR"))
+
+--==BOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+#!/bin/bash
+
+# Run Order: 3
+# Run Frequency: only once, on first boot
+
+# Tasks:
 # - Make the vault config file
 # - Make the systemd service file
 
@@ -77,7 +104,7 @@ ui  = "true"
 api_addr = "https://${VAULT_DNS}"
 
 # For forwarding between vault servers.  Set to own ip.
-cluster_addr = "http://INSTANCE_IP_ADDR:8201"
+cluster_addr = "https://INSTANCE_IP_ADDR:8201"
 
 # Auto unseal the vault
 seal "awskms" {
@@ -96,8 +123,9 @@ listener "tcp" {
   address = "INSTANCE_IP_ADDR:8200"
   cluster_address = "INSTANCE_IP_ADDR:8201"
 
-  # off, because they all talk in a private subnet
-  tls_disable = "true"
+  tls_disable = "false"
+  tls_cert_file = "/opt/vault/tls/vault.crt"
+  tls_key_file = "/opt/vault/tls/vault.key"
 }
 
 storage "dynamodb" {
