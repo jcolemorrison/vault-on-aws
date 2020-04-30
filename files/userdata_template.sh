@@ -5,6 +5,7 @@ MIME-Version: 1.0
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
+set -e
 
 # Run Order: 1
 # Run Frequency: only once, on first boot
@@ -24,17 +25,17 @@ yum install -y jq
 useradd --system --shell /sbin/nologin vault
 
 # Make the directories
-mkdir -p "/opt/vault"
-mkdir -p "/opt/vault/bin"
-mkdir -p "/opt/vault/config"
-mkdir -p "/opt/vault/tls"
+mkdir -p /opt/vault
+mkdir -p /opt/vault/bin
+mkdir -p /opt/vault/config
+mkdir -p /opt/vault/tls
 
 # Give corret permissions
-chmod 755 "/opt/vault"
-chmod 755 "/opt/vault/bin"
+chmod 755 /opt/vault
+chmod 755 /opt/vault/bin
 
 # Change ownership to vault user
-chown -R "vault:vault" "/opt/vault"
+chown -R vault:vault /opt/vault
 
 # Download the vault bin
 curl -o /tmp/vault.zip https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
@@ -46,7 +47,7 @@ unzip -d /tmp /tmp/vault.zip
 mv /tmp/vault /opt/vault/bin
 
 # give ownership to the vault user
-chown vault:vault /opt/vault/bin
+chown vault:vault /opt/vault/bin/vault
 
 # create a symlink
 ln -s /opt/vault/bin/vault /usr/local/bin/vault
@@ -58,6 +59,7 @@ setcap cap_ipc_lock=+ep /opt/vault/bin/vault
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
+set -e
 
 # Run Order: 2
 # Run Frequency: only once, on first boot
@@ -75,15 +77,25 @@ INSTANCE_DNS_NAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)
 # ...or paying $400/month base for the ACM private CA.
 openssl req -x509 -sha256 -nodes \
   -newkey rsa:4096 -days 3650 \
-  -keyout /opt/vault/tls/vault.pem -out /opt/vault/tls/vault.crt \
+  -keyout /opt/vault/tls/vault.key -out /opt/vault/tls/vault.crt \
   -subj "/CN=$INSTANCE_DNS_NAME" \
   -extensions san \
   -config <(cat /etc/pki/tls/openssl.cnf <(echo -e "\n[san]\nsubjectAltName=DNS:$INSTANCE_DNS_NAME,IP:$INSTANCE_IP_ADDR"))
+
+chown vault:vault /opt/vault/tls/vault.key
+chown vault:vault /opt/vault/tls/vault.crt
+
+chmod 640 /opt/vault/tls/vault.key
+chmod 644 /opt/vault/tls/vault.crt
+
+# Trust the certificate
+cp /opt/vault/tls/vault.crt /etc/pki/tls/certs/vault.crt
 
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
+set -e
 
 # Run Order: 3
 # Run Frequency: only once, on first boot
@@ -114,7 +126,7 @@ seal "awskms" {
 
 # Listener for loopback
 listener "tcp" {
-  address = "127.0.0.1:8200"
+  address = "127.0.0.1:8199"
   tls_disable = "true"
 }
 
@@ -135,7 +147,7 @@ storage "dynamodb" {
 }
 EOF
 
-chwon vault:vault /opt/vault/config/server.hcl
+chown vault:vault /opt/vault/config/server.hcl
 
 # The systemd service file
 cat > /etc/systemd/system/vault.service <<- EOF
@@ -175,8 +187,9 @@ EOF
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
+set -e
 
-# Run Order: 3
+# Run Order: 4
 # Run Frequency: only once, on first boot
 
 # Tasks:
@@ -194,8 +207,9 @@ systemctl restart vault
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
+set -e
 
-# Run Order: 4
+# Run Order: 5
 # Run Frequency: only once, on first boot
 
 # Tasks:
@@ -209,10 +223,9 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 # Workaround to make sure the vault service is fully initialized.
 sleep 10
 
-export VAULT_ADDR="http://127.0.0.1:8200"
+export VAULT_ADDR="http://127.0.0.1:8199"
 export AWS_DEFAULT_REGION="${VAULT_CLUSTER_REGION}"
-
-VAULT_INITIALIZED=$(vault operator init -status)
+export VAULT_INITIALIZED=$(vault operator init -status) # avoid non-zero exit status
 
 function initialize_vault {
   # initialize and pipe to file
