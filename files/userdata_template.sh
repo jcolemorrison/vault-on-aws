@@ -37,14 +37,21 @@ chmod 755 /opt/vault/bin
 # Change ownership to vault user
 chown -R vault:vault /opt/vault
 
-# Download the vault bin
-curl -o /tmp/vault.zip https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
+# Get the HashiCorp PGP
+curl https://keybase.io/hashicorp/pgp_keys.asc | gpg --import
 
-# unzip it in the /tmp dir
-unzip -d /tmp /tmp/vault.zip
+# Download vault and signatures
+curl -Os https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
+curl -Os https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS
+curl -Os https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS.sig
 
-# move it to the /opt/vault/bin dir
-mv /tmp/vault /opt/vault/bin
+# Verify Signatres
+gpg --verify vault_${VAULT_VERSION}_SHA256SUMS.sig vault_${VAULT_VERSION}_SHA256SUMS
+cat vault_${VAULT_VERSION}_SHA256SUMS | grep vault_${VAULT_VERSION}_linux_amd64.zip | sha256sum -c
+
+# unzip and move to /opt/vault/bin
+unzip vault_${VAULT_VERSION}_linux_amd64.zip
+mv vault /opt/vault/bin
 
 # give ownership to the vault user
 chown vault:vault /opt/vault/bin/vault
@@ -54,6 +61,11 @@ ln -s /opt/vault/bin/vault /usr/local/bin/vault
 
 # allow vault permissions to use mlock and prevent memory from swapping to disk
 setcap cap_ipc_lock=+ep /opt/vault/bin/vault
+
+# cleanup files
+rm vault_${VAULT_VERSION}_linux_amd64.zip
+rm vault_${VAULT_VERSION}_SHA256SUMS
+rm vault_${VAULT_VERSION}_SHA256SUMS.sig
 
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
