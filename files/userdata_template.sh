@@ -233,7 +233,7 @@ set -e
 # - Erase bash history
 
 # Workaround to make sure the vault service is fully initialized.
-sleep 10
+sleep 20
 
 export VAULT_ADDR="http://127.0.0.1:8199"
 export AWS_DEFAULT_REGION="${VAULT_CLUSTER_REGION}"
@@ -251,6 +251,7 @@ function initialize_vault {
 
   # cleanup
   rm vault_credentials.txt
+  rm vault_creds_encrypted
   history -c
   history -w
 }

@@ -12,7 +12,7 @@ To use:
 
     ```sh
     # Point Vault at your domain.
-    # - Traffic is encrypted.
+    # - Traffic is encrypted end-to-end.
     # - Data is encrypted before storage and at rest.  
     # - DDoS protected.
     # - Scoped to specified IP CIDR blocks.
@@ -42,7 +42,7 @@ To use:
     cat > dev_policy.hcl <<EOF
     # Admin of all secrets at this path only.
     path "secret/data/dev/*" {
-      capabilities = ["create", "read", "update", "delete", "list"]
+      capabilities = ["create", "read", "update", "delete"]
     }
     EOF
 
@@ -134,9 +134,9 @@ The Vault Servers themselves are given the bare-minimum permissions, through [IA
 
 After turning off [operator mode](#operator-mode), the Vault Servers have ZERO access to the public internet.  Only requests coming from the Application Load Balancer (ALB).  Communication with DynamoDB and KMS happen through VPC Endpoints and HTTPS.  [Vault Servers communicate through the storage backend](https://www.vaultproject.io/docs/concepts/ha.html#server-to-server-communication), which means communication between Vault Servers is also a non-issue.
 
-Because all traffic between AWS services and the Vault Servers occur via HTTPS, TLS is terminated at the Load Balancer.  This cuts down the added encryption overhead and need for extra certificates.  Since the VPC, and the subnets the Vault Servers exist in, are completely locked down, there is no chance for compromise unless you were to use this VPC for something OTHER than Vault.
+To complete end-to-end encryption of all traffic, the Vault Servers also encrypt communication between themselves and the load balancer.  For the normal, public-facing deployments this has little effect since all foreign traffic can only come through the load balancer.  For the private deployment option (more on this next), it ensures that the Vault Servers are protected from any activity from services within peering VPCs.
 
-However, if you need to give AWS resources in external VPCs access to Vault, use [VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html).  Don't worry, this project can do that automatically for you as outlined in the [private deployment settings](#prerequisites-for-private-deployment) section.
+In addition to the normal deployment, there's also an option for a private deployment.  Doing so will allow you to give AWS resources in external VPCs access to Vault, [VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html).  This project can do that automatically for you as outlined in the [private deployment settings](#prerequisites-for-private-deployment) section.
 
 If you'd like to learn more about IAM, security, and the IAM Policy language, [check out this guide](https://start.jcolemorrison.com/aws-vpc-core-concepts-analogy-guide/).
 
