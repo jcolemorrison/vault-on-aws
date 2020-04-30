@@ -652,11 +652,35 @@ Delete everything in the created S3 bucket and Simply run `terraform destroy` in
 
 #### Can I use this in existing Terraform projects?
 
-Although this module isn't currently on the Terraform Registry, you can absolutely use it in an existing project.  You'll need to use it as a custom module though.
+Although this module isn't currently on the Terraform Registry, you can absolutely use it in an existing project.  There's two ways to do this:
+
+###### 1 - As a Github Source Module
+
+In your code add the following:
+
+```hcl
+module "vault_deployment" {
+    source = "github.com/jcolemorrison/vault-on-aws"
+    
+    # Required Variables
+    domain_name = "secrets.domain.com"
+    ec2_key_pair_name = "vault_key_pair"
+
+    # Other variables
+    # ...
+}
+
+# Example output
+output "vault_vpc_id" {
+    value = module.vault_deployment.vpc_id
+}
+```
+
+###### 2 - As a Local Custom Module
 
 1. Created a nested folder in your existing Terraform project.
 
-    ```
+    ```sh
     # assuming you're in your Terraform project directory...
     mkdir - p ./modules/vault_deploy/
     ```
@@ -665,7 +689,7 @@ Although this module isn't currently on the Terraform Registry, you can absolute
 
 2. Clone the project into your newly created, nested folder:
 
-    ```
+    ```sh
     # Clone the repo
     git clone git:repo ./modules/vault_deploy/
 
@@ -679,7 +703,7 @@ Although this module isn't currently on the Terraform Registry, you can absolute
 
     ```hcl
     module "vault_deployment" {
-      source = "./modules/vault_deploy
+      source = "./modules/vault_deploy"
       
       # Required Variables
       domain_name = "secrets.domain.com"
