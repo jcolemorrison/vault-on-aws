@@ -3,7 +3,6 @@
 ## S3 Bucket for Vault Data
 resource "aws_s3_bucket" "vault_data" {
   bucket_prefix = "${var.main_project_tag}-"
-  region = data.aws_region.current.name
 
   server_side_encryption_configuration {
     rule {
