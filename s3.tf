@@ -4,14 +4,6 @@
 resource "aws_s3_bucket" "vault_data" {
   bucket_prefix = "${var.main_project_tag}-"
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
   tags = merge({ "Project" = var.main_project_tag })
 }
 
