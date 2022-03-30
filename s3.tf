@@ -7,6 +7,17 @@ resource "aws_s3_bucket" "vault_data" {
   tags = merge({ "Project" = var.main_project_tag })
 }
 
+## S3 Server-side bucket encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "vault_data_sse" {
+  bucket = aws_s3_bucket.vault_data.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
+  }
+}
+
 ## S3 Bucket Public Access Block
 resource "aws_s3_bucket_public_access_block" "vault_data" {
   bucket = aws_s3_bucket.vault_data.id
