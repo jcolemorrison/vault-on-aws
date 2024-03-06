@@ -46,7 +46,7 @@ resource "aws_egress_only_internet_gateway" "eigw" {
 resource "aws_eip" "nat" {
   count = var.operator_mode ? 1 : 0
 
-  vpc = true
+  domain = "vpc"
 
   tags = merge(
     { "Name" = "${var.main_project_tag}-nat-eip"},
